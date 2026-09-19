@@ -1,0 +1,8 @@
+#!/bin/bash
+set -e
+clang -O2 -g -target bpf -c parse_ip.bpf.c -o parse_ip.bpf.o
+sudo bpftool net detach xdp dev enp0s3 2>/dev/null || true
+sudo rm -f /sys/fs/bpf/parse_ip
+sudo rm -rf /sys/fs/bpf/parse_ip_maps
+sudo bpftool prog load parse_ip.bpf.o /sys/fs/bpf/parse_ip pinmaps /sys/fs/bpf/parse_ip_maps
+sudo bpftool net attach xdp pinned /sys/fs/bpf/parse_ip dev enp0s3
